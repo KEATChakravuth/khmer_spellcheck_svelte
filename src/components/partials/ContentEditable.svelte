@@ -2,12 +2,12 @@
 <script>
     import { onMount } from "svelte";
     import { Content, SpellCheck} from "../../stores"
-    import { API_ENDPOINT } from '../../../env';
 
     let content = ''; // State to manage the content
     
     async function fetchData(){
       try {
+        const API_ENDPOINT = ""
         SpellCheck.set("");
         const res = await fetch(API_ENDPOINT, {
           method: 'POST',
