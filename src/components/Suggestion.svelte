@@ -4,6 +4,7 @@
     let suggestions;
     let selectedSuggestions = [];
     let spellcheck_copy;
+    let isInputSelected = []; // Track whether input is selected for each suggestion
 
     let count;
 
@@ -66,11 +67,15 @@
 
         // Discard the last item from the results array
         results.pop();
+
+        // Initialize isInputSelected array
+        isInputSelected = Array(suggestions.length).fill(false);
     });
 
     const onChange = (e, i) => {
         const selectedWord = e.target.value;
         selectedSuggestions[i] = selectedWord;
+        isInputSelected[i] = true; // Set to true when input is selected
     }
     
     const handleCorrectTextAccept = (index) => {
@@ -101,13 +106,16 @@
         
         // Update
         handleCorrectTextDismiss(index);
+        // if(suggestions.length == 0) {
+        //     unsubscribe();
+        // }
         SpellCheck.set(correctedText);
     }
 
     const handleCorrectTextDismiss = (index) => {
         
         // Extracting the index
-
+        
         // Removing the item at the extracted index
         suggestions.splice(index, 1);
         suggestions = [...suggestions];
@@ -165,13 +173,19 @@
                     </div>
                     <div class="word-select">
                             <p style="margin: 8px;">{results[i]+"___"}</p>
-                            {#each suggestion as word, j}                       
+                            {#each suggestion as word, j}
+                                {#if suggestion.length > 1}
                                     <input type="radio" id={"word-" + i + "-" + j} name={"word-" + i} value={word} on:change={(e) => onChange(e, i)}/>
                                     <label for={"word-" + i + "-" + j}>{word}</label>
+                                {:else}
+                                    
+                                    <input type="radio" id={"word-" + i + "-" + j} name={"word-" + i} value={word} on:click={(e) => onChange(e, i)}/>
+                                    <label for={"word-" + i + "-" + j}>{word}</label>
+                                {/if}                            
                             {/each}
                     </div>
                     <div class="correct-text-footer">
-                        <button class="btn-accept" on:click={() => handleCorrectTextAccept(i)}>Accept</button>
+                        <button class="btn-accept" on:click={() => handleCorrectTextAccept(i)} disabled={!isInputSelected[i]}>Accept</button>
                         <button class="btn-dismiss" on:click={() => handleCorrectTextDismiss(i)}>Dismiss</button>
                     </div>
                 </div>
@@ -308,6 +322,17 @@
     .btn-accept:active {
         transform: translateY(1px); /* Push the button down slightly when clicked */
     }
+    .btn-accept:disabled{
+        background-color: #cccccc;
+        color: #333;
+        cursor:auto;
+    }
+
+    .btn-accept:disabled:hover{
+        transform:scale(1);
+        opacity: 1;
+    }
+
     .btn-dismiss {
         padding: 0.5rem 1rem; /* Increase padding for better button appearance */
         background-color: white;
