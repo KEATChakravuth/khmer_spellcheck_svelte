@@ -1,4 +1,3 @@
-
 <script>
     import { onMount } from "svelte";
     import { Content, SpellCheck} from "../../stores"
@@ -7,7 +6,7 @@
     
     async function fetchData(){
       try {
-        const API_ENDPOINT = ""
+        const API_ENDPOINT = "";
         SpellCheck.set("");
         const res = await fetch(API_ENDPOINT, {
           method: 'POST',
@@ -32,22 +31,17 @@
     });
 
 </script>
-  
-<div
-  contenteditable = true
-  class="text"
-  bind:textContent={content}
->
-  {content}
-</div>
 
-<div
-  class="text"
->
-  {$SpellCheck}
-</div>
-  
+<h3 style="text-align: center;">Type Here</h3>
+<div contenteditable = true class="text" bind:textContent={content}>{content}</div>
+<br>
+<h3 style="text-align: center;">SpellCheck</h3>
+<div class="correction">{$SpellCheck}</div>
+
 <style>
+    /* .highlight {
+      color: red;
+    } */
     .text{
         border: none;
         margin: 1rem 0rem;
@@ -57,6 +51,7 @@
         max-height: 30vh;
         min-height: 30vh;
         overflow-y: auto;
+        background-color: rgb(241, 241, 241);
     }
     .text:focus{
         outline: none;
@@ -64,5 +59,14 @@
     .text:empty::before{
         content: attr();
         color: rgb(150, 150, 150);
+    }
+    .correction{
+        border: none;
+        margin: 1rem 0rem;
+        border-radius: 0.5rem;
+        font-size: 1.5rem;
+        padding: 0.5rem;
+        overflow-y: auto;
+        background-color: rgb(241, 241, 241);
     }
 </style>

@@ -1,6 +1,7 @@
 <script>
     import {Content, SpellCheck} from "../stores"
 
+    let currentIndex = 0;
     let suggestions;
     let selectedSuggestions = [];
     let spellcheck_copy;
@@ -23,15 +24,23 @@
         return result;
     }
 
+    // Function to handle event when "Next" button is clicked
+    // function onNext() {
+    //     currentIndex++; // Increment the index to show the next item
+    //     if (currentIndex >= suggestions.length) {
+    //     currentIndex = 0; // Reset to the first item when reaching the end
+    //     }
+    // }
+
     let results = [];
     const unsubscribe = SpellCheck.subscribe(value => {
-        results = [];
+        currentIndex = 0;
         // Log the value of the SpellCheck store
         // create a copy(a cheat) to not effect the original spellcheck
         spellcheck_copy = value;
 
         suggestions = parseOptions(value);
-
+        console.log(suggestions);
         // Count suggestions
         count = 0;
         for (let i = 0; i < suggestions.length; i++) {
@@ -39,6 +48,7 @@
         }
 
         // Create list of corrected statement before incorrected word
+        results = [];
         let currentSubstring = '';
         let insideBrackets = false;
         for (let i = 0; i < value.length; i++) {
@@ -146,11 +156,12 @@
         let BracketValue = matches.length >= index+1 ? matches[index] : null;
         
         spellcheck_copy = spellcheck_copy.replace('[' + BracketValue + ']', BracketValue);
+        // onNext()
     }
 </script>
 
 <div class="suggestion">
-    <h5 class="title">
+    <h3 class="title">
         <span class="count">{count}
         </span> 
         {#if count <= 1}
@@ -158,41 +169,41 @@
         {:else}
             Suggestions
         {/if} 
-    </h5>
+    </h3>
     <button class="btn-red">Check correctness</button>
     <button class="btn-blue">Check synonyms</button>
     <button class="btn-green">Translate to Your Language</button>
     <div class="active">
         <div class="wrapper">
-            {#if suggestions.length > 0}
-                {#each suggestions as suggestion, i}
+            {#if suggestions.length > 0 && suggestions[currentIndex]}
                 <div class="correct-text">
                     <div class="correct-text-header">
                         <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 9.3 38.4 31 38.3 57.2c-.5 99.2-41.3 280.7-213.6 363.2c-16.7 8-36.1 8-52.8 0C57.3 420.7 16.5 239.2 16 140c-.1-26.2 16.3-47.9 38.3-57.2L242.7 2.9C246.8 1 251.4 0 256 0zm0 66.8V444.8C394 378 431.1 230.1 432 141.4L256 66.8l0 0z"/></svg> 
                         <p>Correction</p>
                     </div>
                     <div class="word-select">
-                            <p style="margin: 8px;">{results[i]+"___"}</p>
-                            {#each suggestion as word, j}
-                                {#if suggestion.length > 1}
-                                    <input type="radio" id={"word-" + i + "-" + j} name={"word-" + i} value={word} on:change={(e) => onChange(e, i)}/>
-                                    <label for={"word-" + i + "-" + j}>{word}</label>
-                                {:else}
-                                    
-                                    <input type="radio" id={"word-" + i + "-" + j} name={"word-" + i} value={word} on:click={(e) => onChange(e, i)}/>
-                                    <label for={"word-" + i + "-" + j}>{word}</label>
-                                {/if}                            
-                            {/each}
+                        <p style="margin: 8px;">{results[currentIndex]+"___"}</p>
+                        {#each suggestions[currentIndex] as suggestion, i}
+                            {#if suggestions[currentIndex].length > 1}
+                                <input type="radio" id={i + suggestion} name="suggestion" value={suggestion} on:change={(e) => onChange(e, currentIndex)}/>
+                                <label for={i + suggestion}>{suggestion}</label>
+                            {:else}
+                                <input type="radio" id={i + suggestion} name="suggestion" value={suggestion} on:click={(e) => onChange(e, currentIndex)}/>
+                                <label for={i + suggestion}>{suggestion}</label>
+                            {/if}                            
+                        {/each}
                     </div>
                     <div class="correct-text-footer">
-                        <button class="btn-accept" on:click={() => handleCorrectTextAccept(i)} disabled={!isInputSelected[i]}>Accept</button>
-                        <button class="btn-dismiss" on:click={() => handleCorrectTextDismiss(i)}>Dismiss</button>
+                        <button class="btn-accept" on:click={() => handleCorrectTextAccept(currentIndex)} disabled={!isInputSelected[currentIndex]}>Accept</button>
+                        <button class="btn-dismiss" on:click={() => handleCorrectTextDismiss(currentIndex)}>Dismiss</button>
+                        <!-- <button class="btn-dismiss" on:click={() => handleCorrectTextDismiss(currentIndex)}>Next</button> -->
                     </div>
                 </div>
-                {/each}
             {:else}
-                <img class="active-img" src="correct.png" alt="correct" />
-                <h5 class="active-message">No Correction Your Grammar is Good!</h5>
+                <!-- <img class="active-img" src="correct.png" alt="correct" /> -->
+                <svg class="active-img" fill="none" viewBox="0 0 64 65" role="img" aria-hidden="true" focusable="false"><g clip-path="url(#EmptyE_a)"><path fill="#fff" stroke="#0E101A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M47.87 26.1c-.06 0-.1-.05-.1-.1.09-3.4-1.08-4.63-4.47-4.73-.06 0-.1-.05-.1-.1 0-.06.05-.1.1-.1 3.4.09 4.63-1.08 4.73-4.47 0-.06.05-.1.1-.1.06 0 .1.05.1.1-.09 3.4 1.08 4.63 4.47 4.72.06 0 .1.05.1.1 0 .06-.05.1-.1.1-3.4-.09-4.63 1.08-4.73 4.47 0 .07-.05.11-.1.11ZM10.68 28.5c-.06 0-.1-.04-.1-.1.09-3.11-.98-4.24-4.1-4.33-.04 0-.08-.04-.08-.1 0-.05.04-.08.1-.08 3.11.08 4.24-.99 4.33-4.1 0-.05.04-.09.1-.09.05 0 .08.04.08.1-.08 3.11.99 4.24 4.1 4.32.05 0 .09.04.09.1 0 .05-.04.08-.1.08-3.11-.08-4.24.99-4.33 4.1 0 .06-.04.1-.1.1ZM35.84 12.5c-.06 0-.1-.06-.1-.12.1-3.96-1.27-5.4-5.23-5.51-.07 0-.11-.06-.11-.13 0-.06.06-.1.12-.1 3.96.1 5.4-1.27 5.51-5.23 0-.07.06-.11.13-.11.06 0 .1.06.1.12-.1 3.97 1.27 5.4 5.23 5.5.07 0 .11.06.11.13 0 .06-.06.1-.12.1-3.96-.1-5.4 1.27-5.51 5.23-.01.08-.06.12-.13.12Z"></path><path fill="#0E101A" stroke="#0E101A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M2.19 6.8a2.53 2.53 0 1 1 2.74-4.24l30.2 19.54-2.74 4.24L2.19 6.81Z"></path><path fill="#fff" stroke="#0E101A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M24.3 21.1a2.52 2.52 0 1 1 2.74-4.23l8.75 5.65-2.74 4.24-8.75-5.66Z"></path><circle cx="34.41" cy="24.67" r="2.55" fill="#fff" stroke="#0E101A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" transform="rotate(-57 34.4 24.67)"></circle><path fill="#C6CBDE" d="M32 64.5c10.6 0 19.2-1.61 19.2-3.6s-8.6-3.6-19.2-3.6-19.2 1.61-19.2 3.6 8.6 3.6 19.2 3.6Z"></path><path fill="#6E66DE" stroke="#0E101A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M42.84 34.42H21.16l-3.23 23.34c-.2 1.49.5 2.9 1.94 3.3 2.13.6 6 1.27 12.62 1.27 6.77 0 10.35-.7 12.17-1.3 1.17-.4 1.64-1.56 1.47-2.78l-3.29-23.83Z"></path><path fill="#F8C6DA" stroke="#0E101A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="m43.74 41.35-.9-6.93H21.16l-.9 6.93h23.48Z"></path><path fill="#6E66DE" stroke="#0E101A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M50.08 33.3H13.92a1.12 1.12 0 0 0 0 2.24h36.16a1.12 1.12 0 1 0 0-2.24Z"></path></g><defs><clipPath id="EmptyE_a"><path fill="#fff" d="M0 .5h64v64H0z"></path></clipPath></defs></svg>
+                <h5 class="active-message">Start writing to make the magic happen.</h5>
+                <p style="text-align: center;">Suggestions will appear here.</p>
             {/if}
         </div>
     </div>

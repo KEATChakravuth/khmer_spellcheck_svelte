@@ -4,7 +4,7 @@
 </script>
 
 <div class="document">
-    <input type="text" class="title" placeholder="Untitled Document">
+    <!-- <input type="text" class="title" placeholder="Untitled Document"> -->
     <TextCustomBar/>
     <ContentEditable/>
 </div>
