@@ -35,7 +35,7 @@
 <h3 style="text-align: center;">Type Here</h3>
 <div contenteditable = true class="text" bind:textContent={content}>{content}</div>
 <br>
-<h3 style="text-align: center;">SpellCheck</h3>
+<h3 style="text-align: center;">Spell Check</h3>
 <div class="correction">{$SpellCheck}</div>
 
 <style>
